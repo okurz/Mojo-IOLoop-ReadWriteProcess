@@ -20,6 +20,7 @@ jobs:
             perl: '5.26'
           - os: macos-latest
             perl: latest
+      fail-fast: false
     name: 🐪 Perl ${{ matrix.perl }} on ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -42,6 +43,9 @@ jobs:
         run: |
           TEST_SHARED=1 TEST_SUBREAPER=1 PERL5OPT="-MDevel::Cover=-coverage,statement" prove -l t
           cover -report codecovbash
+          curl https://raw.githubusercontent.com/okurz/retry/refs/heads/main/count-fail-ratio > count-fail-ratio
+          chmod +x count-fail-ratio
+          TEST_SHARED=1 TEST_SUBREAPER=1 PERL5OPT="-MDevel::Cover=-coverage,statement" runs=1000 ./count-fail-ratio prove -l t
       - name: Upload coverage to ☂️ Codecov
         uses: codecov/codecov-action@v5
         if: matrix.perl == 'latest'
