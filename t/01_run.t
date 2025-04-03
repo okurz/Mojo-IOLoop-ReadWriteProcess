@@ -4,7 +4,7 @@ use warnings;
 use strict;
 use Test::More;
 use Test::Exception;
-use POSIX;
+use POSIX ':sys_wait_h';
 use FindBin;
 use IO::Select;
 use Mojo::File qw(tempfile path);
@@ -655,4 +655,14 @@ subtest 'SIG_CHLD handler in spawned process' => sub {
   like($p->read_all_stdout, qr/SIG_CHLD/, "SIG_CHLD handler was executed");
 };
 
+#END {
+    while (my $pid = waitpid(-1, WNOHANG) > 0) {
+         diag "Found still running sub-process PID $pid, waiting for termination";
+    }
+    note "### all processes: " . qx{ps auxf} . "\n";
+    note "### processes in tree: " . qx{ps Tf} . "\n";
+#}
+
 done_testing;
+
+1;

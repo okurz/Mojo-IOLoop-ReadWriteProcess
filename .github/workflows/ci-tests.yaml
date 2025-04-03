@@ -46,6 +46,8 @@ jobs:
           curl https://raw.githubusercontent.com/okurz/retry/refs/heads/main/count-fail-ratio > count-fail-ratio
           chmod +x count-fail-ratio
           TEST_SHARED=1 TEST_SUBREAPER=1 PERL5OPT="-MDevel::Cover=-coverage,statement" runs=1000 ./count-fail-ratio prove -l t
+          echo "### And now just perl, no prove, no devel cover"
+          TEST_SHARED=1 TEST_SUBREAPER=1 runs=1000 ./count-fail-ratio perl t/01_run.t
       - name: Upload coverage to ☂️ Codecov
         uses: codecov/codecov-action@v5
         if: matrix.perl == 'latest'
