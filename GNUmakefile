@@ -24,3 +24,7 @@ tidy: ## Format code using perltidy (tools/tidy)
 .PHONY: check
 check: ## Check code formatting without applying changes
 	./tools/tidy --check
+
+.PHONY: check-coverage
+check-coverage: ## Run test suite and verify statement coverage is above threshold
+	./tools/check-coverage

@@ -1,0 +1,52 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+
+my $threshold = 90.0;
+
+# Delete existing cover db
+system("cover -delete");
+
+# Run test suite with coverage
+print "Running test suite with Devel::Cover...\n";
+$ENV{TEST_SHARED} = 1;
+$ENV{TEST_SUBREAPER} = 1;
+$ENV{HARNESS_PERL_SWITCHES} = "-MDevel::Cover";
+
+my $prove_cmd = "prove -j 4 -l";
+my $exit_code = system($prove_cmd);
+if ($exit_code != 0) {
+    print STDERR "Test suite failed! Cannot check coverage.\n";
+    exit 1;
+}
+
+# Run cover and parse output
+print "Generating coverage report...\n";
+open my $fh, "-|", "cover" or die "Cannot run cover: $!";
+my $coverage;
+while (my $line = <$fh>) {
+    print $line;
+    if ($line =~ /^Total\s+(\d+\.\d+)/) {
+        $coverage = $1;
+    }
+}
+close $fh;
+
+if (!defined $coverage) {
+    print STDERR "Failed to parse total coverage percentage.\n";
+    exit 1;
+}
+
+print "\n";
+print "--------------------------------------------------\n";
+print "Total Statement Coverage: $coverage%\n";
+print "Required Threshold      : $threshold%\n";
+print "--------------------------------------------------\n";
+
+if ($coverage < $threshold) {
+    print STDERR "Coverage check failed! Coverage is below threshold.\n";
+    exit 1;
+}
+
+print "Coverage check passed successfully!\n";
+exit 0;
